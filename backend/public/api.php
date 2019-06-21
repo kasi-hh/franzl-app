@@ -1,3 +1,5 @@
 <?php
 
-echo 'hallo';
+//phpinfo();
+//return;
+include '../bootstrap.php';
