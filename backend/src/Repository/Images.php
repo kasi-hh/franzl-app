@@ -23,7 +23,9 @@ class Images {
     protected $di;
 
     public function __construct(\Slim\Container $di = null) {
-        $this->setDi($di);
+        if (null !== $di) {
+            $this->setDi($di);
+        }
     }
 
     public function setDi(\Slim\Container $di) {
@@ -74,7 +76,7 @@ class Images {
         $stmt->setFetchMode(\PDO::FETCH_ASSOC);
         $data = $stmt->fetch();
         */
-        $data = $db->fetchAssoc('select * from franzl where id=:id',['id'=>$id]);
+        $data = $db->fetchAssoc('select * from franzl where id=:id', ['id' => $id]);
         if ($data) {
             return new Image($data);
         }
@@ -85,28 +87,30 @@ class Images {
      * @param \App\Model\Image $image
      * @param $imageData
      * @param $dir
-     * @throws \Interop\Container\Exception\ContainerException
+     * @return Image
      * @throws ConnectionException
      * @throws \Exception
-     * @return Image
+     * @throws \Interop\Container\Exception\ContainerException
      */
     public function addImage(\App\Model\Image $image, $stream): ?Image {
-        $basename = FileLib::getFilename($image->getTitle()) . '.jpg';
-        $filename = IMAGE_ROOT . DIRECTORY_SEPARATOR . $basename;
         $db = $this->getDb();
         $db->beginTransaction();
         $data = [
             'title' => $image->getTitle(),
             'info' => $image->getInfo(),
             'created' => (new \DateTime())->format('Y-m-d H:i:s'),
-            'href' => '/images/' . $basename
+            'tag' => $image->getTag(),
+            'latitude' => $image->getLatitude(),
+            'longitude' => $image->getLongitude(),
         ];
         try {
-            if (file_put_contents($filename, $stream) === false) {
-                throw new \Exception("Can not write file: $filename");
-            }
             $db->insert('franzl', $data);
             $id = $db->lastInsertId();
+            $filename = 'image-' . $id . '.jpg';
+            if (file_put_contents(IMAGE_ROOT . DIRECTORY_SEPARATOR . $filename, $stream) === false) {
+                throw new \Exception("Can not write file: $filename");
+            }
+            $db->update('franzl', ['href' => '/images/' . $filename], ['id' => $id]);
             $result = $this->getImage($id);
             $db->commit();
             return $result;
@@ -114,6 +118,60 @@ class Images {
             unlink($filename);
             $db->rollBack();
             throw $e;
+        }
+    }
+
+    /**
+     * @param Image $image
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Interop\Container\Exception\ContainerException
+     * @throws \Exception
+     */
+    public function updateImage(\App\Model\Image $image) {
+        $data = [
+            'title' => $image->getTitle(),
+            'info' => $image->getInfo(),
+            'tag' => $image->getTag(),
+            'latitude' => $image->getLatitude(),
+            'longitude' => $image->getLongitude(),
+        ];
+        $db = $this->getDb();
+        $db->beginTransaction();
+        try {
+            $db->update('franzl', $data, ['id' => $image->getId()]);
+            $db->commit();
+        } catch (\Exception $e) {
+            $db->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * @param Image $image
+     * @return bool
+     * @throws ConnectionException
+     * @throws \Interop\Container\Exception\ContainerException
+     */
+    public function deleteImage(\App\Model\Image $image) {
+        $href = $image->getHref();
+        $imageDir = IMAGE_ROOT;
+        $file = dirname($imageDir) . $href;
+        $db = $this->getDb();
+        $db->beginTransaction();
+        try {
+            if (is_file($file)) {
+                unlink($file);
+            }
+            $db->delete('franzl', ['id' => $image->getId()]);
+            if (!is_file($file)) {
+                $db->commit();
+                return true;
+            }
+            $db->rollBack();
+            return false;
+        } catch (\Exception $e) {
+            $db->rollBack();
+            return false;
         }
     }
 }

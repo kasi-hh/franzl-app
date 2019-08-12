@@ -24,10 +24,13 @@ class Auth extends \App\ControlerBase {
      * @throws \Interop\Container\Exception\ContainerException
      */
     public function loginAction(Request $request, Response $response): Response{
-        $userName = $request->getParam('user');
+        $userName = strtolower($request->getParam('username'));
         $password = $request->getParam('password');
         $config = $this->di->get('settings');
         $users = $config['users'];
+        if (!isset($users[$userName])){
+            return $response->withJson(['success'=>false,'message'=>'invalid username or password '.var_export($users, true)]);
+        }
         $userHash = $config['users'][$userName];
         $key = $config['jwt']['secret'];
         $hash = password_hash($password, PASSWORD_DEFAULT);
@@ -41,9 +44,6 @@ class Auth extends \App\ControlerBase {
             'valid'=>\App\Lib\Security::verifyPassword($password, $userHash),
         ]);
         */
-        if (!isset($users[$userName])){
-            return $response->withJson(['success'=>false,'message'=>'invalid username or password']);
-        }
         if (!\App\Lib\Security::verifyPassword($password, $userHash)) {
             return $response->withJson(['success'=>false,'message'=>'invalid username or password']);
         }
@@ -72,8 +72,6 @@ class Auth extends \App\ControlerBase {
             'success'=>true,
             'token'=>$jwt
         ]);
-        return $response
-            ->withHeader('Authorization','Bearer '.$jwt);
     }
     public function hashAction(Request $request, Response $response): Response {
         $hash = password_hash($request->getParam('password'),PASSWORD_DEFAULT);

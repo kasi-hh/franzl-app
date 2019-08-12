@@ -27,6 +27,7 @@ module.exports = function (ctx) {
             components: [
                 'QLayout',
                 'QHeader',
+                'QFooter',
                 'QDrawer',
                 'QPageContainer',
                 'QPage',
@@ -37,7 +38,14 @@ module.exports = function (ctx) {
                 'QList',
                 'QItem',
                 'QItemSection',
-                'QItemLabel'
+                'QItemLabel',
+                'QInput',
+                'QCard',
+                'QCardSection',
+                'QCardActions',
+                'QImg',
+                'QSelect',
+                'QOptionGroup',
             ],
 
             directives: [
@@ -46,7 +54,10 @@ module.exports = function (ctx) {
 
             // Quasar plugins
             plugins: [
-                'Notify'
+                'Notify',
+                'LocalStorage',
+                'Dialog',
+                'Loading',
             ]
 
             // iconSet: 'ionicons-v4'
@@ -57,7 +68,7 @@ module.exports = function (ctx) {
 
         build: {
             scopeHoisting: true,
-            // vueRouterMode: 'history',
+            vueRouterMode: 'history',
             // vueCompiler: true,
             // gzip: true,
             // analyze: true,
@@ -72,6 +83,12 @@ module.exports = function (ctx) {
             open: true, // opens browser window automatically
             proxy: {
                 '/api': {
+                    target: 'http://localhost:8081',
+                    bypass: (request, response, options) => {
+                        console.log(request)
+                    }
+                },
+                '/images': {
                     target: 'http://localhost:8081'
                 }
             }
@@ -86,14 +103,30 @@ module.exports = function (ctx) {
 
         pwa: {
             // workboxPluginMode: 'InjectManifest',
-            // workboxOptions: {}, // only for NON InjectManifest
+            workboxOptions: {
+                skipWaiting: true,
+                runtimeCaching: [
+                    {
+                        urlPattern: /\/images\//,
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'my-image-cache',
+                            expiration: {
+                                maxEntries: 500,
+                                maxAgeSeconds: 30 * 24 * 60 * 60 * 2, // 60 Days
+                            }
+
+                        }
+                    }
+                ]
+            }, // only for NON InjectManifest
             manifest: {
                 // name: 'Quasar App',
                 // short_name: 'Quasar-PWA',
                 // description: 'Best PWA App in town!',
                 display: 'standalone',
                 orientation: 'portrait',
-                background_color: '#ffffff',
+                background_color: '#000000',
                 theme_color: '#027be3',
                 icons: [
                     {

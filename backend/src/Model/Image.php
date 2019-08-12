@@ -17,6 +17,51 @@ class Image implements \JsonSerializable {
     protected $info;
     protected $href;
     protected $created;
+    protected $tag;
+    protected $latitude;
+    protected $longitude;
+
+    /**
+     * @return mixed
+     */
+    public function getLatitude() {
+        return $this->latitude;
+    }
+
+    /**
+     * @param mixed $latitude
+     */
+    public function setLatitude($latitude): void {
+        $this->latitude = $latitude;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLongitude() {
+        return $this->longitude;
+    }
+
+    /**
+     * @param mixed $longitude
+     */
+    public function setLongitude($longitude): void {
+        $this->longitude = $longitude;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTag() {
+        return $this->tag;
+    }
+
+    /**
+     * @param mixed $tag
+     */
+    public function setTag($tag): void {
+        $this->tag = $tag;
+    }
 
     /**
      * Image constructor.
@@ -27,7 +72,10 @@ class Image implements \JsonSerializable {
         $this->title = $data['title'] ?? '';
         $this->info = $data['info'] ?? '';
         $this->href = $data['href'] ?? '';
-        $this->create = $data['create'] ?? '';
+        $this->tag = $data['tag'] ?? '';
+        $this->latitude = $data['latitude'] ?? '';
+        $this->longitude = $data['longitude'] ?? '';
+        $this->created = $data['created'] ?? '';
     }
     public function jsonSerialize() {
         return [
@@ -35,10 +83,25 @@ class Image implements \JsonSerializable {
             'title'=>$this->title,
             'info'=>$this->info,
             'href'=>$this->href,
+            'tag'=>$this->tag,
+            'latitude'=>$this->latitude,
+            'longitude'=>$this->longitude,
             'created'=>$this->created,
         ];
     }
 
+    /**
+     * @param $title
+     */
+    public function setTitle($title){
+        $this->title = $title;
+    }
+    /**
+     * @param $info
+     */
+    public function setInfo($info){
+        $this->info = $info;
+    }
     /**
      * @return mixed|string
      */

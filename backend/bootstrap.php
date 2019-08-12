@@ -45,6 +45,7 @@ $app->map(['GET','POST'],'/api/{controller}/{action}', function(Request $request
 //$app->add(new \App\Auth());
 $app->add(new Tuupola\Middleware\JwtAuthentication([
     "secret" => $app->getContainer()->get('settings')['jwt']['secret'],
+    'secure' => false,
     "ignore"=>['/api/auth']
 ]));
 try {
