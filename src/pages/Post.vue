@@ -48,7 +48,9 @@
                         Loading.hide()
                         this.$q.notify({
                             message: error.toString()
-                        })
+                        });
+                        this.$q.localStorage.remove('token')
+                        this.$router.replace('/login')
                     })
                 } catch (err) {
                     Loading.hide();

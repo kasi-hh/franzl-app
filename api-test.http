@@ -1,0 +1,12 @@
+GET https://franzl.kasi-hamburg.de/api/image/list
+Content-Type: application/json;charset=UTF-8
+authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvZnJhbnpsLmthc2ktaGFtYnVyZy5kZSIsImV4cCI6MTU3MDk3NzM4OCwiaWF0IjoxNTYyMzM3Mzg4LCJhcHAudXNlciI6Imthc2kifQ.8RFQWUtqKUOU0R6Ibkq1azM-6oh7sDD7llEqAk4ohDE
+
+
+###
+GET https://franzl.kasi-hamburg.de/api/auth/login
+Content-Type: application/json;charset=UTF-8
+
+{"username":"kasi","password":"kasimat"}
+
+###
